@@ -10,7 +10,7 @@ class Message(BaseModel):
 
 DEEPSEEK_API_KEY = "sk-af6e1672921341f7b36a004fa3d508b5"
 
-@app.post("/")
+@app.post("/api/chat")
 async def chat(message: Message):
     response = requests.post(
         "https://api.deepseek.com/v1/chat/completions",
