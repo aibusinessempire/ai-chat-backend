@@ -8,13 +8,21 @@ app = FastAPI()
 class Message(BaseModel):
     text: str
 
-DEEPSEEK_API_KEY = "sk-af6e1672921341f7b36a004fa3d508b5"
+# Use environment variable to protect API key
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 @app.post("/api/chat")
 async def chat(message: Message):
+    if not DEEPSEEK_API_KEY:
+        return {"error": "API key is missing. Set DEEPSEEK_API_KEY in environment variables."}
+
     response = requests.post(
         "https://api.deepseek.com/v1/chat/completions",
         headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"},
         json={"model": "deepseek-chat", "messages": [{"role": "user", "content": message.text}]}
     )
-    return {"response": response.json()["choices"][0]["message"]["content"]}
+
+    try:
+        return {"response": response.json()["choices"][0]["message"]["content"]}
+    except KeyError:
+        return {"error": "Invalid API response. Check your DeepSeek API key and usage limits."}
